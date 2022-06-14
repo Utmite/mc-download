@@ -1,11 +1,12 @@
-
-while getopts p:v:b:n: flag
+while getopts p:v:b:n:w:d: flag
 do
     case "${flag}" in
         p) PROJECT=${OPTARG};;
         v) VERSION=${OPTARG};;
         b) BUILD=${OPTARG};;
         n) NAMED=${OPTARG};;
+	w) WORLD_LEVEL=${OPTARG};;
+	d) PORT_SERVER=${OPTARG};;
     esac
 done
 
@@ -40,3 +41,21 @@ fi
 
 echo "Download..."
 curl -o $NAMED.jar https://api.papermc.io/v2/projects/$PROJECT/versions/$VERSION/builds/$BUILD/downloads/$PROJECT-$VERSION-$BUILD.jar
+
+if [ -z "$PORT_SERVER" ]
+then
+	echo "Which port do you want to run the server on:"
+	read PORT_SERVER
+fi
+
+if [ -z "$WORLD_LEVEL" ]
+then
+	echo "What world do you want to play: "
+	read WORLD_LEVEL
+fi
+
+sed -i "s/server-port=.*/server-port=$PORT_SERVER/" $( pwd )/server.properties
+sed -i "s/level-name=.*/level-name=$WORLD_LEVEL/" $( pwd )/server.properties
+
+java -Xms2G -Xmx2G -jar $( pwd )/$NAMED.jar --nogui
+
